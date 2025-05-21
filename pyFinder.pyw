@@ -3,6 +3,9 @@ import fitz  # PyMuPDF
 import threading
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
+import pyautogui
+import time
+import subprocess
 
 # --- Control Flags ---
 stop_search_flag = threading.Event()
@@ -30,7 +33,9 @@ def search_pdf_files(base_folder, keywords, progress_callback=None, result_callb
             file_path = os.path.join(root, file)
             if is_valid_file(file_path):
                 all_files.append(file_path)
-                
+
+    # Sort files by modification time (newest first)
+    all_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
 
     total = len(all_files)
 
@@ -56,9 +61,17 @@ def search_pdf_files(base_folder, keywords, progress_callback=None, result_callb
             print(f"❗ Error reading {file_path}: {e}")
 
 
-def open_folder_location(file_path):
+def open_file_location(file_path):
     folder_path = os.path.dirname(file_path)
     os.startfile(folder_path)
+
+
+def select_file_and_press_space(file_path):
+    folder_path = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    subprocess.Popen(f'explorer /select,"{file_path}"')
+    time.sleep(0.5)
+    pyautogui.press('space')
 
 
 def update_progress(current, total):
@@ -80,7 +93,9 @@ def display_result(file_path, snippets):
         pady=6
     )
     file_label.pack(fill=tk.X, pady=(6, 2))
-    file_label.bind("<Button-1>", lambda e, path=file_path: open_folder_location(path))
+
+    # Left click: select file in explorer and press spacebar
+    file_label.bind("<Button-1>", lambda e, path=file_path: select_file_and_press_space(path))
 
     for snippet in snippets:
         snippet_label = tk.Label(
@@ -99,9 +114,8 @@ def display_result(file_path, snippets):
     root.update_idletasks()
 
 
-def start_search():
+def start_search(event=None):  # `event` added to allow binding to <Return>
     stop_search_flag.clear()
-
     folder_path = selected_folder or DEFAULT_FOLDER
     raw_keywords = keyword_var.get().strip()
 
@@ -111,7 +125,7 @@ def start_search():
 
     keywords = [k.strip().lower() for k in raw_keywords.split(",") if k.strip()]
 
-    clear_results()
+    clear_results(keep_keyword=True)
     progress["value"] = 0
     progress_label.config(text="Starting search...")
 
@@ -129,11 +143,13 @@ def stop_search():
     progress_label.config(text="Search stopped.")
 
 
-def clear_results():
+def clear_results(keep_keyword=False):
     for widget in result_frame.winfo_children():
         widget.destroy()
     progress["value"] = 0
     progress_label.config(text="Results cleared.")
+    if not keep_keyword:
+        keyword_var.set("")
 
 
 def choose_folder():
@@ -156,7 +172,6 @@ root.configure(bg="#2e2e2e")
 # --- Dark Theme Styling ---
 style = ttk.Style()
 style.theme_use("default")
-
 style.configure("TLabel", background="#2e2e2e", foreground="white")
 style.configure("TButton", background="#444", foreground="white", font=("Helvetica", 12))
 style.configure("TProgressbar", background="#5cb85c", troughcolor="#1e1e1e", bordercolor="#1e1e1e")
@@ -168,14 +183,12 @@ style.configure("Vertical.TScrollbar",
 top_bar = tk.Frame(root, bg="#2e2e2e")
 top_bar.pack(fill=tk.X, padx=10, pady=5)
 
-# Folder Selector
 folder_button = tk.Button(top_bar, text="Select Folder", command=choose_folder, bg="#444", fg="white", font=("Helvetica", 12))
 folder_button.pack(side=tk.LEFT)
 
 folder_label = tk.Label(top_bar, text=f"📁 {DEFAULT_FOLDER}", bg="#2e2e2e", fg="white", font=("Helvetica", 12))
 folder_label.pack(side=tk.LEFT, padx=10)
 
-# Keyword Entry
 keyword_var = tk.StringVar()
 keyword_entry = tk.Entry(
     top_bar,
@@ -190,8 +203,8 @@ keyword_entry = tk.Entry(
     relief=tk.FLAT
 )
 keyword_entry.pack(side=tk.LEFT, padx=10)
+keyword_entry.bind("<Return>", start_search)  # Pressing Enter triggers search
 
-# Control Buttons
 search_button = tk.Button(top_bar, text="Search", command=start_search, bg="#555", fg="white", font=("Helvetica", 12))
 stop_button = tk.Button(top_bar, text="Stop", command=stop_search, bg="#800000", fg="white", font=("Helvetica", 12))
 clear_button = tk.Button(top_bar, text="Clear", command=clear_results, bg="#444", fg="white", font=("Helvetica", 12))
@@ -200,16 +213,9 @@ search_button.pack(side=tk.LEFT, padx=5)
 stop_button.pack(side=tk.LEFT, padx=5)
 clear_button.pack(side=tk.LEFT, padx=5)
 
-# --- Progress Bar ---
-progress_label = tk.Label(root, text="", fg="white", bg="#2e2e2e", font=("Helvetica", 11))
-progress_label.pack(pady=(2, 1))
-
-progress = ttk.Progressbar(root, orient="horizontal", length=800, mode="determinate")
-progress.pack(pady=(0, 8))
-
 # --- Scrollable Results Area ---
 result_container = tk.Frame(root, bg="#2e2e2e")
-result_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+result_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
 canvas = tk.Canvas(result_container, bg="#2e2e2e", highlightthickness=0)
 scrollbar = ttk.Scrollbar(result_container, orient="vertical", command=canvas.yview)
@@ -234,10 +240,17 @@ def _on_mousewheel(event):
     canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
 canvas.bind_all("<MouseWheel>", _on_mousewheel)
-canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))  # Linux
+canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
 canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
 
 result_frame = scrollable_frame
+
+# --- Progress Bar ---
+progress_label = tk.Label(root, text="", fg="white", bg="#2e2e2e", font=("Helvetica", 11))
+progress_label.pack(pady=(2, 1))
+
+progress = ttk.Progressbar(root, orient="horizontal", length=800, mode="determinate")
+progress.pack(pady=(0, 8))
 
 # --- Run the app ---
 root.mainloop()
