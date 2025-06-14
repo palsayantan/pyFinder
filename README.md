@@ -1,59 +1,65 @@
-🐍 pyFinder
-A lightweight, Python-based command-line utility to search for and locate files, directories, or content within your local system efficiently.
 
-⚡ Designed for developers, sysadmins, and power users who need a simple yet powerful search tool.
+# 🐍 pyFinder
 
-🌟 Key Features
-🔍 Filename & Directory Search: Find files or folders using exact matches or wildcards.
+A lightweight, Python-based command-line utility to **search for and locate files**, directories, or content within your local system efficiently.
 
-🔎 Content Search: Recursively search within files for specific text patterns or regex.
+> ⚡ Designed for developers, sysadmins, and power users who need a simple yet powerful search tool.
 
-⚙️ Customizable Scopes: Limit searches to specific directories or exclude specified paths.
+---
 
-📁 Multiple Output Formats: Print results to the console, or export in JSON or CSV for further processing.
+## 🌟 Key Features
 
-🧩 Configuration Support: Save frequently used search setups for convenience.
+- 🔍 **Filename & Directory Search** – Find files or folders using exact matches or wildcards.
+- 🔎 **Content Search** – Recursively search within files for specific text patterns or regex.
+- ⚙️ **Customizable Scopes** – Limit searches to specific directories or exclude specified paths.
+- 📁 **Multiple Output Formats** – Print results to the console, or export in JSON or CSV.
+- 🧩 **Configuration Support** – Save frequently used search setups for reuse.
 
-🧭 Installation
-Ideal for use on Linux, macOS, or Windows (with WSL or Command Prompt).
+---
+
+## 🚀 Quick Start
+
+### 🔧 Installation
 
 Install via pip:
 
-bash
-Copy
-Edit
+```bash
 pip install pyfinder
-Alternatively, clone and install from source:
+```
 
-bash
-Copy
-Edit
+Or clone and install from source:
+
+```bash
 git clone https://github.com/palsayantan/pyFinder.git
 cd pyFinder
 pip install .
-🚀 Quick Start
-Run a basic filename search:
+```
 
-bash
-Copy
-Edit
+### ▶️ Basic Usage
+
+Search for files:
+
+```bash
 pyfinder --name '*.log' --path /var/log
+```
+
 Search for text inside files:
 
-bash
-Copy
-Edit
+```bash
 pyfinder --content 'TODO' --path ~/projects
-Combine name and content filters:
+```
 
-bash
-Copy
-Edit
+Combine filename and content search:
+
+```bash
 pyfinder --name '*.py' --content 'def main' --path .
-🧰 CLI Reference
-lua
-Copy
-Edit
+```
+
+---
+
+## 🧰 Command Line Options
+
+```
 Usage: pyfinder [OPTIONS]
 
 Options:
@@ -64,94 +70,103 @@ Options:
   -j, --json              Output results in JSON format
   --csv                   Output results in CSV format
   -r, --recursive         Search recursively (default)
-  -i, --ignore-case       Ignore text case during content search
+  -i, --ignore-case       Ignore case during content search
   --config PATH           Load saved search config
-  -s, --save-config NAME  Save this search config for reuse
+  -s, --save-config NAME  Save this search config
   --list-configs          List stored configurations
-  -h, --help              Show help message and exit
-📄 Example Usage Scenarios
-1. Find all .md files in Documents (flat search):
-bash
-Copy
-Edit
-pyfinder --name '*.md' --path ~/Documents --no-recursive
-2. Locate .js files excluding node_modules:
-bash
-Copy
-Edit
+  -h, --help              Show this message and exit
+```
+
+---
+
+## 💡 Examples
+
+### 1. Find all `.md` files in Documents
+
+```bash
+pyfinder --name '*.md' --path ~/Documents
+```
+
+### 2. Search `.js` files excluding `node_modules`
+
+```bash
 pyfinder --name '*.js' --path . --exclude 'node_modules'
-3. Search for the string 'FIXME' in codebase, case-insensitive:
-bash
-Copy
-Edit
+```
+
+### 3. Case-insensitive search for `'FIXME'` in codebase
+
+```bash
 pyfinder --content 'FIXME' --ignore-case --path ~/dev/myapp
-4. Save and reuse a search config:
-bash
-Copy
-Edit
+```
+
+### 4. Save and reuse a configuration
+
+```bash
 pyfinder --name '*.py' --content 'import' --save-config find-py-imports
 pyfinder --config find-py-imports
-🛠️ Configuration File Format
-Configurations are stored in ~/.pyfinder/config.yaml:
+```
 
-yaml
-Copy
-Edit
+---
+
+## 🗂️ Configuration Format
+
+Configurations are saved in `~/.pyfinder/config.yaml`:
+
+```yaml
 name: '*.py'
 content: 'def main'
 path: '/home/user/projects'
 exclude: ['build', 'dist']
 ignore_case: true
 output: json
-🧪 Testing & Development
-Clone the repo and prepare a dev environment:
+```
 
-bash
-Copy
-Edit
+---
+
+## 🧪 Development & Testing
+
+```bash
 git clone https://github.com/palsayantan/pyFinder.git
 cd pyFinder
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 pytest
-💡 Why Use pyFinder
-More flexible than find + grep pipelines.
+```
 
-Portable and consistent across platforms.
+---
 
-Clean, human-readable output or structured export.
+## 📦 Why Use pyFinder?
 
-Lightweight, with no heavy dependencies.
+- ✅ More flexible than `find` + `grep` pipelines
+- ✅ Portable across platforms (Windows/Linux/macOS)
+- ✅ Clean, readable output (human or machine)
+- ✅ Lightweight and dependency-minimal
 
-🧩 Contributing
-Contributions welcome! Steps to contribute:
+---
 
-Fork the repo.
+## 🙌 Contributing
 
-Create a branch: git checkout -b feature/awesome
+Contributions welcome! To contribute:
 
-Make your changes.
+1. Fork this repo
+2. Create your feature branch: `git checkout -b my-feature`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin my-feature`
+5. Open a pull request 🎉
 
-Add tests if necessary.
+---
 
-Submit a Pull Request describing your enhancements.
+## 📄 License
 
-📝 License
-Distributed under the MIT License. Check LICENSE for details.
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
-👨‍💻 Author
-Sayantan Pal – passionate software dev & toolsmith.
+---
 
-🧾 Feedback & Support
-Encounter issues or want features? Please:
+## 👨‍💻 Author
 
-Open an issue on GitHub.
+**Sayantan Pal**
 
-Submit a PR with your ideas or fixes.
+- 🔗 GitHub: [@palsayantan](https://github.com/palsayantan)
 
-Email me at palsayantan@gmail.com.
-
-Happy searching!
-
-> 🛠️ Created by [@palsayantan](https://github.com/palsayantan) with the assistance of ChatGPT.
+---
